@@ -208,7 +208,7 @@ class NotifyBurstSMS(NotifyBase):
 
         else:
             self.country = country.lower().strip()
-            if country not in BURST_SMS_COUNTRY_CODES:
+            if self.country not in BURST_SMS_COUNTRY_CODES:
                 msg = (
                     f"An invalid Burst SMS country ({country}) was specified."
                 )
@@ -288,6 +288,10 @@ class NotifyBurstSMS(NotifyBase):
             # The to gets populated in the loop below
             "to": None,
         }
+
+        if self.validity:
+            # Expire the message if it can't be delivered in time (minutes)
+            payload["validity"] = self.validity
 
         # Send in batches if identified to do so
         batch_size = 1 if not self.batch else self.default_batch_size
