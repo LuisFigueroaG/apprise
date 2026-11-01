@@ -25,10 +25,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# Sign-up with https://burstsms.com/
+# Burst SMS is now Kudosity.  Existing accounts and API keys keep working.
+#
+# Sign-up with https://kudosity.com/
 #
 # Define your API Secret here and acquire your API Key
-#  - https://can.transmitsms.com/profile
+#  - In your account, open Settings and then API Settings
+#
+# Resources:
+# - https://developers.kudosity.com/reference/authentication
 #
 import requests
 
@@ -68,13 +73,14 @@ class NotifyBurstSMS(NotifyBase):
     """A wrapper for Burst SMS Notifications."""
 
     # The default descriptive name associated with the Notification
-    service_name = "Burst SMS"
+    service_name = "Kudosity"
 
     # The services URL
-    service_url = "https://burstsms.com/"
+    service_url = "https://kudosity.com/"
 
-    # The default protocol
-    secure_protocol = "burstsms"
+    # The default protocol; kudosity:// is accepted as an alias since
+    # Burst SMS was renamed to Kudosity
+    secure_protocol = ("burstsms", "kudosity")
 
     # The maximum amount of SMS Messages that can reside within a single
     # batch transfer based on:
@@ -394,7 +400,7 @@ class NotifyBurstSMS(NotifyBase):
         params.update(self.url_parameters(privacy=privacy, *args, **kwargs))
 
         return "{schema}://{key}:{secret}@{source}/{targets}/?{params}".format(
-            schema=self.secure_protocol,
+            schema=self.secure_protocol[0],
             key=self.pprint(self.apikey, privacy, safe=""),
             secret=self.pprint(
                 self.secret, privacy, mode=PrivacyMode.Secret, safe=""
@@ -413,7 +419,12 @@ class NotifyBurstSMS(NotifyBase):
 
         Targets or end points should never be identified here.
         """
-        return (self.secure_protocol, self.apikey, self.secret, self.source)
+        return (
+            self.secure_protocol[0],
+            self.apikey,
+            self.secret,
+            self.source,
+        )
 
     def __len__(self):
         """Returns the number of targets associated with this notification."""

@@ -102,6 +102,15 @@ apprise_url_tests = (
         },
     ),
     (
+        "kudosity://{}:{}@{}/{}".format("a" * 8, "b" * 16, "5" * 11, "6" * 11),
+        {
+            # kudosity:// is an alias of burstsms://
+            "instance": NotifyBurstSMS,
+            # Generated URLs always use the main schema
+            "privacy_url": "burstsms://a...a:****@",
+        },
+    ),
+    (
         "burstsms://_?key={}&secret={}&from={}&to={}&batch=y".format(
             "a" * 8, "b" * 16, "5" * 11, "6" * 11
         ),
@@ -274,3 +283,17 @@ def test_plugin_burstsms_country_case():
     assert isinstance(obj, NotifyBurstSMS)
     assert obj.country == "au"
     assert "country=au" in obj.url()
+
+
+def test_plugin_burstsms_kudosity_alias():
+    """NotifyBurstSMS() kudosity:// matches the same burstsms:// account."""
+
+    burst = Apprise.instantiate(
+        "burstsms://{}:{}@{}/{}".format("a" * 8, "b" * 16, "5" * 11, "6" * 11)
+    )
+    kudosity = Apprise.instantiate(
+        "kudosity://{}:{}@{}/{}".format("a" * 8, "b" * 16, "5" * 11, "6" * 11)
+    )
+    assert isinstance(kudosity, NotifyBurstSMS)
+    assert kudosity.url_identifier == burst.url_identifier
+    assert kudosity.url().startswith("burstsms://")
